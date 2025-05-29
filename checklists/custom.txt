@@ -1,0 +1,17 @@
+# Sample Custom Checklist
+# Format: Each line is a checklist item
+# Lines with :: separator contain instructions for that item
+# Lines starting with # are comments and will be ignored
+
+Title and Abstract :: Check if the title clearly indicates the study design and if the abstract provides a structured summary
+Introduction: Background :: Look for statements explaining the scientific background and rationale for the study
+Introduction: Objectives :: Identify specific objectives or hypotheses stated in the introduction
+Methods: Study Design :: Extract information about the overall study design and any specific methodologies used
+Methods: Participants :: Find details about participant selection, inclusion/exclusion criteria, and recruitment
+Methods: Data Collection :: Look for information on how data was collected, including instruments and measurements
+Methods: Statistical Analysis :: Identify statistical methods used, including handling of missing data and power calculations
+Results: Participant Flow :: Look for information about participant recruitment, retention, and flow through the study
+Results: Main Outcomes :: Extract the primary findings and results for the main outcome measures
+Discussion: Interpretation :: Find authors' interpretation of results and how they relate to the research question
+Discussion: Limitations :: Identify any limitations or potential biases acknowledged by the authors
+Funding Sources :: Look for information about funding sources and any potential conflicts of interest 
