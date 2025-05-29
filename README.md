@@ -46,24 +46,32 @@ python suggest_checklist.py /path/to/your/manuscript.pdf --model mistral:instruc
 
 ### Fill a Checklist
 
-Fills a specified checklist template based on the content of a manuscript and generates a PDF report.
+Fills a custom checklist based on the content of a manuscript and generates a PDF report. The checklist can be provided as a PDF, DOCX, or TXT file containing the checklist items.
 
 ```bash
 # Using the default model (llama3.1:8b-instruct-q8_0)
-python fill_checklist.py --template PRISMA --manuscript paper.docx --output filled_prisma_report.pdf
+python fill_checklist.py --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
 
 # Specifying a different Ollama model
-python fill_checklist.py --template CONSORT --manuscript study.txt --output consort_report.pdf --model gemma:7b-it
+python fill_checklist.py --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
 # Output: Checklist successfully generated: consort_report.pdf
 ```
 
-*   `--template`: Choose one of `CONSORT`, `PRISMA`, `STARD`, `DEAL`.
-*   `--manuscript`: Path to the `.pdf`, `.docx`, or `.txt` file.
-*   `--output`: Path for the generated PDF (defaults to `filled_checklist.pdf`).
-*   `--model`: Optional Ollama model name to use (defaults to `llama3.1:8b-instruct-q8_0`).
+*   `--checklist`: Path to the checklist file (.pdf, .docx, .txt) containing the checklist items to be filled
+*   `--manuscript`: Path to the manuscript file (.pdf, .docx, .txt) to analyze
+*   `--output`: Path for the generated PDF report (defaults to `filled_checklist.pdf`)
+*   `--model`: Optional Ollama model name to use (defaults to `llama3.1:8b-instruct-q8_0`)
+
+The script automatically detects and processes different checklist formats:
+- **PRISMA**: For systematic reviews and meta-analyses
+- **STARD**: For diagnostic accuracy studies  
+- **CONSORT**: For randomized controlled trials
+- **Custom formats**: With `::` separators for item instructions
+- **Generic**: Automatically parsed checklist structures
 
 ## Scripts
 
 *   `suggest_checklist.py`: Suggests a checklist based on manuscript content using Ollama.
-*   `fill_checklist.py`: Fills a specific checklist using manuscript content and Ollama, generating a PDF.
-*   `templates.py`: Contains the structure (item headings) for the supported checklists. 
+*   `fill_checklist.py`: Fills a custom checklist using manuscript content and Ollama, generating a PDF report.
+*   `templates.py`: Contains the structure (item headings) for the supported checklists used by the suggestion feature.
+*   `view_sample_files.py`: Utility script to view the content of sample files for testing. 
