@@ -1,6 +1,8 @@
-# Checklist CLI
+# CheckSupport- A CLI Tool
 
 A command-line tool to suggest and fill reporting checklists for research manuscripts using local LLMs via Ollama.
+
+
 
 ## Installation
 
