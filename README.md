@@ -1,8 +1,8 @@
 # CheckSupport- A CLI Tool
 
+![Alt text](CS_LOGO.png)
+
 A command-line tool to suggest and fill reporting checklists for research manuscripts using local LLMs via Ollama.
-
-
 
 ## Installation
 
