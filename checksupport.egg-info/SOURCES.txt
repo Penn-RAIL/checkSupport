@@ -1,0 +1,14 @@
+README.md
+setup.py
+checksupport/__init__.py
+checksupport/cli.py
+checksupport/fill_checklist.py
+checksupport/suggest_checklist.py
+checksupport/templates.py
+checksupport.egg-info/PKG-INFO
+checksupport.egg-info/SOURCES.txt
+checksupport.egg-info/dependency_links.txt
+checksupport.egg-info/entry_points.txt
+checksupport.egg-info/not-zip-safe
+checksupport.egg-info/requires.txt
+checksupport.egg-info/top_level.txt

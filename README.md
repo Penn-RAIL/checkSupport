@@ -28,7 +28,7 @@ A command-line tool to suggest and fill reporting checklists for research manusc
 
 ## Usage
 
-Make sure the Ollama application is running before executing the scripts.
+Make sure the Ollama application is running before executing the commands.
 
 ### Suggest a Checklist
 
@@ -36,10 +36,13 @@ Analyzes a manuscript and suggests the most appropriate reporting checklist (CON
 
 ```bash
 # Using the default model (llama3.1:8b-instruct-q8_0)
-python suggest_checklist.py /path/to/your/manuscript.pdf 
+checksupport suggest /path/to/your/manuscript.pdf 
+
+# Using individual command
+suggest-checklist /path/to/your/manuscript.pdf
 
 # Specifying a different Ollama model
-python suggest_checklist.py /path/to/your/manuscript.pdf --model mistral:instruct 
+checksupport suggest /path/to/your/manuscript.pdf --model mistral:instruct 
 # Output: Suggested checklist: PRISMA 
 ```
 
@@ -51,11 +54,14 @@ python suggest_checklist.py /path/to/your/manuscript.pdf --model mistral:instruc
 Fills a custom checklist based on the content of a manuscript and generates a PDF report. The checklist can be provided as a PDF, DOCX, or TXT file containing the checklist items.
 
 ```bash
-# Using the default model (llama3.1:8b-instruct-q8_0)
-python fill_checklist.py --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
+# Using the main CLI
+checksupport fill --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
+
+# Using individual command
+fill-checklist --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
 
 # Specifying a different Ollama model
-python fill_checklist.py --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
+checksupport fill --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
 # Output: Checklist successfully generated: consort_report.pdf
 ```
 
@@ -63,6 +69,13 @@ python fill_checklist.py --checklist consort_checklist.txt --manuscript study.pd
 *   `--manuscript`: Path to the manuscript file (.pdf, .docx, .txt) to analyze
 *   `--output`: Path for the generated PDF report (defaults to `filled_checklist.pdf`)
 *   `--model`: Optional Ollama model name to use (defaults to `llama3.1:8b-instruct-q8_0`)
+
+### Available Commands
+
+- `checksupport suggest <manuscript>` - Suggest appropriate checklist
+- `checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output>` - Fill checklist
+- `suggest-checklist <manuscript>` - Individual suggest command
+- `fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output>` - Individual fill command
 
 The script automatically detects and processes different checklist formats:
 - **PRISMA**: For systematic reviews and meta-analyses

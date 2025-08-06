@@ -1,0 +1,150 @@
+Metadata-Version: 2.4
+Name: checksupport
+Version: 1.0.0
+Summary: A CLI tool to suggest and fill reporting checklists for research manuscripts using local LLMs via Ollama
+Home-page: https://github.com/checksupport/checksupport
+Author: CheckSupport Team
+Author-email: support@checksupport.com
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Topic :: Text Processing :: Linguistic
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: certifi==2025.4.26
+Requires-Dist: chardet==5.2.0
+Requires-Dist: charset-normalizer==3.4.2
+Requires-Dist: diskcache==5.6.3
+Requires-Dist: filelock==3.18.0
+Requires-Dist: fsspec==2025.3.2
+Requires-Dist: hf-xet==1.1.0
+Requires-Dist: huggingface-hub==0.31.1
+Requires-Dist: idna==3.10
+Requires-Dist: inquirerpy==0.3.4
+Requires-Dist: Jinja2==3.1.6
+Requires-Dist: llama_cpp_python==0.3.9
+Requires-Dist: lxml==5.4.0
+Requires-Dist: MarkupSafe==3.0.2
+Requires-Dist: numpy==2.2.5
+Requires-Dist: packaging==25.0
+Requires-Dist: pfzy==0.3.4
+Requires-Dist: pillow==11.2.1
+Requires-Dist: prompt_toolkit==3.0.51
+Requires-Dist: PyPDF2==3.0.1
+Requires-Dist: python-docx==1.1.2
+Requires-Dist: PyYAML==6.0.2
+Requires-Dist: reportlab==4.4.0
+Requires-Dist: requests==2.32.3
+Requires-Dist: tqdm==4.67.1
+Requires-Dist: typing_extensions==4.13.2
+Requires-Dist: urllib3==2.4.0
+Requires-Dist: wcwidth==0.2.13
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# CheckSupport- A CLI Tool
+
+![Alt text](CS_LOGO.png)
+
+A command-line tool to suggest and fill reporting checklists for research manuscripts using local LLMs via Ollama.
+
+## Installation
+
+1.  **Install Ollama:** Follow the instructions on [ollama.com](https://ollama.com/) to download and install Ollama for your operating system.
+
+2.  **Pull an LLM:** Open your terminal and pull a suitable instruction-following model. The current default is `llama3.1:8b-instruct-q8_0`. Examples:
+    ```bash
+    ollama pull llama3.1:8b-instruct-q8_0
+    # or
+    ollama pull mistral:instruct 
+    # or
+    ollama pull gemma:7b-it
+    ```
+    Make sure the Ollama application/server is running in the background.
+
+3.  **Clone the Repository & Install Dependencies:**
+    ```bash
+    git clone <your-repo-url> checklist_cli
+    cd checklist_cli
+    pip install -r requirements.txt 
+    # or python -m pip install -r requirements.txt
+    ```
+
+## Usage
+
+Make sure the Ollama application is running before executing the commands.
+
+### Suggest a Checklist
+
+Analyzes a manuscript and suggests the most appropriate reporting checklist (CONSORT, PRISMA, STARD, DEAL).
+
+```bash
+# Using the default model (llama3.1:8b-instruct-q8_0)
+checksupport suggest /path/to/your/manuscript.pdf 
+
+# Using individual command
+suggest-checklist /path/to/your/manuscript.pdf
+
+# Specifying a different Ollama model
+checksupport suggest /path/to/your/manuscript.pdf --model mistral:instruct 
+# Output: Suggested checklist: PRISMA 
+```
+
+*   Supports `.pdf`, `.docx`, and `.txt` manuscript files.
+*   The `--model` argument specifies the Ollama model name (defaults to `llama3.1:8b-instruct-q8_0`).
+
+### Fill a Checklist
+
+Fills a custom checklist based on the content of a manuscript and generates a PDF report. The checklist can be provided as a PDF, DOCX, or TXT file containing the checklist items.
+
+```bash
+# Using the main CLI
+checksupport fill --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
+
+# Using individual command
+fill-checklist --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
+
+# Specifying a different Ollama model
+checksupport fill --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
+# Output: Checklist successfully generated: consort_report.pdf
+```
+
+*   `--checklist`: Path to the checklist file (.pdf, .docx, .txt) containing the checklist items to be filled
+*   `--manuscript`: Path to the manuscript file (.pdf, .docx, .txt) to analyze
+*   `--output`: Path for the generated PDF report (defaults to `filled_checklist.pdf`)
+*   `--model`: Optional Ollama model name to use (defaults to `llama3.1:8b-instruct-q8_0`)
+
+### Available Commands
+
+- `checksupport suggest <manuscript>` - Suggest appropriate checklist
+- `checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output>` - Fill checklist
+- `suggest-checklist <manuscript>` - Individual suggest command
+- `fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output>` - Individual fill command
+
+The script automatically detects and processes different checklist formats:
+- **PRISMA**: For systematic reviews and meta-analyses
+- **STARD**: For diagnostic accuracy studies  
+- **CONSORT**: For randomized controlled trials
+- **Custom formats**: With `::` separators for item instructions
+- **Generic**: Automatically parsed checklist structures
+
+## Scripts
+
+*   `suggest_checklist.py`: Suggests a checklist based on manuscript content using Ollama.
+*   `fill_checklist.py`: Fills a custom checklist using manuscript content and Ollama, generating a PDF report.
+*   `templates.py`: Contains the structure (item headings) for the supported checklists used by the suggestion feature.
+*   `view_sample_files.py`: Utility script to view the content of sample files for testing. 

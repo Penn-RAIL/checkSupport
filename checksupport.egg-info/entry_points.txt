@@ -1,0 +1,4 @@
+[console_scripts]
+checksupport = checksupport.cli:main
+fill-checklist = checksupport.fill_checklist:main
+suggest-checklist = checksupport.suggest_checklist:main
