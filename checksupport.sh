@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# CheckSupport - Environment Setup & Ollama CLI Installation Tool
-# A command-line tool to create a complete isolated environment for CheckSupport
+# CheckSupport - Environment Setup Tool
+# A tool for CheckSupport environment setup and management
 
 set -e  # Exit on any error
 
 # Version and metadata
-VERSION="2.0.0"
+VERSION="3.0.0"
 AUTHOR="CheckSupport Team"
-DESCRIPTION="Complete environment setup and Ollama installation tool for CheckSupport CLI"
+DESCRIPTION="CheckSupport environment setup and management tool"
 
 # Colors for output
 RED='\033[0;31m'
@@ -20,7 +20,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Default values
-DEFAULT_MODEL="llama3.1:8b-instruct-q8_0"
+DEFAULT_MODEL="mistral:instruct"
 VERBOSE=false
 SKIP_MODEL_PULL=false
 SKIP_PYTHON_DEPS=false
@@ -56,43 +56,47 @@ print_verbose() {
 # Function to display help
 show_help() {
     cat << EOF
-CheckSupport Environment Setup v${VERSION}
+CheckSupport Environment Setup Tool v${VERSION}
 
 ${DESCRIPTION}
 
 USAGE:
-    $0 [OPTIONS] [COMMAND]
+    $0 [OPTIONS] COMMAND [ARGS...]
 
 COMMANDS:
-    install          Create environment and install CheckSupport (default)
-    status           Check environment and Ollama status
-    start            Start CheckSupport environment
-    stop             Stop CheckSupport environment
-    restart          Restart CheckSupport environment
-    test             Test environment and Ollama functionality
-    clean            Remove environment and Ollama installation
-    update           Update environment and dependencies
-    help             Show this help message
+    setup              Complete environment setup (Python, Ollama, dependencies) (default)
+    status             Check environment and Ollama status
+    start              Start Ollama service
+    stop               Stop Ollama service
+    restart            Restart Ollama service
+    uninstall          Remove environment and Ollama installation
+    update             Update environment and dependencies
+    pull-model MODEL   Pull specific Ollama model
+    list-models        List installed Ollama models
+    help               Show this help message
+    version            Show version information
 
 OPTIONS:
     -m, --model MODEL     Specify model to pull (default: ${DEFAULT_MODEL})
     -v, --verbose         Enable verbose output
     -f, --force           Force reinstallation
-    --skip-model          Skip model download
+    --skip-model          Skip model download during setup
     --skip-deps           Skip Python dependencies installation
     --skip-venv           Skip virtual environment creation
-    --skip-git            Skip git repository setup
     --venv-name NAME      Virtual environment name (default: ${VENV_NAME})
     --python-version VER  Python version to use (default: ${PYTHON_VERSION})
     --version             Show version information
     -h, --help            Show this help message
 
 EXAMPLES:
-    $0 install                    # Create environment with default settings
-    $0 install -m mistral:instruct  # Install with specific model
-    $0 status                    # Check environment status
-    $0 start                     # Start CheckSupport environment
-    $0 test                      # Test environment functionality
+    $0 setup                    # Complete setup with default settings
+    $0 setup -m mistral:instruct  # Setup with specific model
+    $0 status                   # Check environment status
+    $0 start                    # Start Ollama service
+    $0 stop                     # Stop Ollama service
+    $0 restart                  # Restart Ollama service
+    $0 pull-model mistral:instruct  # Pull specific model
+    $0 list-models              # List installed models
 
 AUTHOR: ${AUTHOR}
 EOF
@@ -100,7 +104,7 @@ EOF
 
 # Function to show version
 show_version() {
-    echo "CheckSupport Environment Setup v${VERSION}"
+    echo "CheckSupport Complete Management Tool v${VERSION}"
     echo "Author: ${AUTHOR}"
     echo "Description: ${DESCRIPTION}"
 }
@@ -201,6 +205,10 @@ activate_virtual_environment() {
         exit 1
     fi
 }
+
+
+
+
 
 # Function to install Python dependencies
 install_python_dependencies() {
@@ -348,6 +356,16 @@ pull_model() {
     fi
 }
 
+# Function to list models
+list_models() {
+    print_status "Installed models:"
+    if ollama list &> /dev/null; then
+        ollama list 2>/dev/null || echo "  No models found"
+    else
+        print_error "Unable to list models (service may not be running)"
+    fi
+}
+
 # Function to verify installation
 verify_installation() {
     print_status "Verifying installation..."
@@ -375,156 +393,6 @@ verify_installation() {
     fi
     
     return 0
-}
-
-# Function to create environment scripts
-create_environment_scripts() {
-    print_status "Creating environment scripts..."
-    
-    # Activation script
-    cat > activate_env.sh << 'EOF'
-#!/bin/bash
-
-# CheckSupport - Environment Activation Script
-
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}[INFO]${NC} Activating CheckSupport environment..."
-
-# Activate virtual environment
-if [ -f "checksupport/bin/activate" ]; then
-    source checksupport/bin/activate
-    echo -e "${GREEN}[SUCCESS]${NC} Virtual environment activated"
-elif [ -f "checksupport/Scripts/activate" ]; then
-    source checksupport/Scripts/activate
-    echo -e "${GREEN}[SUCCESS]${NC} Virtual environment activated"
-else
-    echo -e "${BLUE}[INFO]${NC} Virtual environment not found, using system Python"
-fi
-
-# Start Ollama if not running
-if ! pgrep -f "ollama serve" > /dev/null; then
-    echo -e "${BLUE}[INFO]${NC} Starting Ollama service..."
-    ollama serve &
-    echo $! > .ollama.pid
-    sleep 3
-fi
-
-echo -e "${GREEN}[SUCCESS]${NC} CheckSupport environment is ready!"
-echo -e "${BLUE}[INFO]${NC} Available CLI commands:"
-echo "  checksupport suggest <manuscript.pdf>"
-echo "  checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-echo "  fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-echo "  suggest-checklist <manuscript.pdf>"
-echo ""
-echo -e "${BLUE}[INFO]${NC} To deactivate: deactivate"
-echo -e "${BLUE}[INFO]${NC} To stop Ollama: ./stop_ollama.sh"
-EOF
-
-    # Start script
-    cat > start_checklist.sh << 'EOF'
-#!/bin/bash
-
-# CheckSupport - Start Script
-# This script activates the environment and starts CheckSupport tools
-
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}[INFO]${NC} Starting CheckSupport environment..."
-
-# Activate virtual environment
-if [ -f "checksupport/bin/activate" ]; then
-    source checksupport/bin/activate
-elif [ -f "checksupport/Scripts/activate" ]; then
-    source checksupport/Scripts/activate
-fi
-
-# Check if Ollama is running
-if ! pgrep -f "ollama serve" > /dev/null; then
-    echo -e "${BLUE}[INFO]${NC} Starting Ollama service..."
-    ollama serve &
-    echo $! > .ollama.pid
-    sleep 3
-fi
-
-echo -e "${GREEN}[SUCCESS]${NC} CheckSupport is ready to use!"
-echo -e "${BLUE}[INFO]${NC} Available CLI commands:"
-echo "  checksupport suggest <manuscript.pdf>"
-echo "  checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-echo "  fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-echo "  suggest-checklist <manuscript.pdf>"
-echo ""
-echo -e "${BLUE}[INFO]${NC} To stop Ollama service: ./stop_ollama.sh"
-EOF
-
-    # Stop script
-    cat > stop_ollama.sh << 'EOF'
-#!/bin/bash
-
-# CheckSupport - Stop Ollama Script
-
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}[INFO]${NC} Stopping Ollama service..."
-
-# Stop Ollama if running
-if pgrep -f "ollama serve" > /dev/null; then
-    pkill -f "ollama serve"
-    echo -e "${GREEN}[SUCCESS]${NC} Ollama service stopped"
-else
-    echo -e "${BLUE}[INFO]${NC} Ollama service is not running"
-fi
-
-# Remove PID file if it exists
-if [ -f ".ollama.pid" ]; then
-    rm .ollama.pid
-fi
-EOF
-
-    # Deactivate script
-    cat > deactivate_env.sh << 'EOF'
-#!/bin/bash
-
-# CheckSupport - Environment Deactivation Script
-
-# Colors for output
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-echo -e "${BLUE}[INFO]${NC} Deactivating CheckSupport environment..."
-
-# Stop Ollama service
-if pgrep -f "ollama serve" > /dev/null; then
-    pkill -f "ollama serve"
-    echo -e "${GREEN}[SUCCESS]${NC} Ollama service stopped"
-fi
-
-# Remove PID file if it exists
-if [ -f ".ollama.pid" ]; then
-    rm .ollama.pid
-fi
-
-# Deactivate virtual environment
-if [ -n "$VIRTUAL_ENV" ]; then
-    deactivate
-    echo -e "${GREEN}[SUCCESS]${NC} Virtual environment deactivated"
-fi
-
-echo -e "${GREEN}[SUCCESS]${NC} CheckSupport environment deactivated"
-EOF
-
-    chmod +x activate_env.sh start_checklist.sh stop_ollama.sh deactivate_env.sh
-    print_success "Created environment scripts"
 }
 
 # Function to show status
@@ -584,52 +452,10 @@ show_status() {
     fi
 }
 
-# Function to test environment
-test_environment() {
-    print_status "Testing CheckSupport environment..."
-    
-    # Test Python
-    if ! command -v python3 &> /dev/null; then
-        print_error "Python 3 not found"
-        return 1
-    fi
-    
-    # Test virtual environment
-    if [ ! -d "$VENV_NAME" ]; then
-        print_error "Virtual environment not found"
-        return 1
-    fi
-    
-    # Test Ollama
-    if ! command -v ollama &> /dev/null; then
-        print_error "Ollama not found"
-        return 1
-    fi
-    
-    # Test service
-    if ! pgrep -f "ollama serve" > /dev/null; then
-        print_warning "Ollama service not running, starting it..."
-        start_ollama_service
-    fi
-    
-    # Test Ollama functionality
-    if ollama list &> /dev/null; then
-        print_success "Environment is working correctly"
-        
-        # Show available models
-        echo ""
-        print_status "Available models:"
-        ollama list 2>/dev/null || echo "  No models found"
-        
-        return 0
-    else
-        print_error "Ollama is not responding properly"
-        return 1
-    fi
-}
 
-# Function to clean environment
-clean_environment() {
+
+# Function to uninstall environment
+uninstall_environment() {
     print_warning "This will remove the entire CheckSupport environment and Ollama. Are you sure? (y/N)"
     read -r response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
@@ -660,12 +486,9 @@ clean_environment() {
         # Remove PID file
         rm -f .ollama.pid
         
-        # Remove environment scripts
-        rm -f activate_env.sh start_checklist.sh stop_ollama.sh deactivate_env.sh
-        
-        print_success "CheckSupport environment cleaned"
+        print_success "CheckSupport environment uninstalled"
     else
-        print_status "Clean operation cancelled"
+        print_status "Uninstall operation cancelled"
     fi
 }
 
@@ -675,12 +498,9 @@ update_environment() {
     
     # Update Python dependencies
     if [ -d "$VENV_NAME" ]; then
-        activate_virtual_environment
-        pip install --upgrade pip
-        if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt --upgrade
-        fi
-        print_success "Python dependencies updated"
+        print_status "Updating Python dependencies..."
+        print_warning "Please activate the virtual environment first: source checksupport/bin/activate"
+        print_status "Then run: pip install -r requirements.txt --upgrade"
     fi
     
     # Update Ollama
@@ -700,6 +520,8 @@ update_environment() {
     print_success "Environment updated successfully"
 }
 
+
+
 # Function to display completion message
 display_completion() {
     echo ""
@@ -710,28 +532,16 @@ display_completion() {
     echo "Environment created successfully!"
     echo ""
     echo "Next steps:"
-    echo "1. Activate the environment: source activate_env.sh"
-    echo "2. Or start the environment: ./start_checklist.sh"
-    echo "3. Test the installation: ./install_ollama.sh test"
-    echo "4. Deactivate when done: ./deactivate_env.sh"
+    echo "1. Activate virtual environment: source checksupport/bin/activate"
+    echo "2. Start Ollama service: $0 start"
+    echo "3. Check status: $0 status"
+    echo "4. Stop when done: $0 stop"
     echo ""
-    echo "Available CLI commands:"
+    echo "Available Python CLI commands:"
     echo "- checksupport suggest <manuscript>"
     echo "- checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-    echo "- fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-    echo "- suggest-checklist <manuscript>"
     echo ""
-    echo "Legacy commands (still work):"
-    echo "- python checksupport/suggest_checklist.py <manuscript>"
-    echo "- python checksupport/fill_checklist.py --checklist <checklist> --manuscript <manuscript> --output <output.pdf>"
-    echo ""
-    echo "Environment scripts:"
-    echo "- activate_env.sh: Activate virtual environment and start Ollama"
-    echo "- start_checklist.sh: Start CheckSupport environment"
-    echo "- stop_ollama.sh: Stop Ollama service"
-    echo "- deactivate_env.sh: Deactivate environment and stop services"
-    echo ""
-    echo "For more information, see README.md"
+    echo "For more information: $0 help"
     echo ""
 }
 
@@ -793,22 +603,22 @@ install_environment() {
         exit 1
     fi
     
-    # Create environment scripts
-    create_environment_scripts
-    
     # Display completion message
     display_completion
 }
 
+
+
 # Parse command line arguments
 parse_args() {
-    COMMAND="install"
+    COMMAND="setup"
     
     while [[ $# -gt 0 ]]; do
         case $1 in
-            install|status|start|stop|restart|test|clean|update|help)
+            setup|status|start|stop|restart|uninstall|update|pull-model|list-models|help|version)
                 COMMAND="$1"
                 shift
+                break
                 ;;
             -m|--model)
                 DEFAULT_MODEL="$2"
@@ -832,10 +642,6 @@ parse_args() {
                 ;;
             --skip-venv)
                 SKIP_VENV=true
-                shift
-                ;;
-            --skip-git)
-                SKIP_GIT=true
                 shift
                 ;;
             --venv-name)
@@ -870,7 +676,7 @@ main() {
     
     # Execute command
     case $COMMAND in
-        install)
+        setup)
             install_environment
             ;;
         status)
@@ -887,17 +693,27 @@ main() {
             sleep 2
             start_ollama_service
             ;;
-        test)
-            test_environment
-            ;;
-        clean)
-            clean_environment
+        uninstall)
+            uninstall_environment
             ;;
         update)
             update_environment
             ;;
+        pull-model)
+            if [ -z "$1" ]; then
+                print_error "Model name required. Usage: $0 pull-model MODEL_NAME"
+                exit 1
+            fi
+            pull_model "$1"
+            ;;
+        list-models)
+            list_models
+            ;;
         help)
             show_help
+            ;;
+        version)
+            show_version
             ;;
         *)
             print_error "Unknown command: $COMMAND"

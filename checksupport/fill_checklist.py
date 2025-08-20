@@ -17,7 +17,7 @@ from reportlab.lib import colors
 from suggest_checklist import extract_manuscript_text, OLLAMA_API_URL
 
 # Define the default model name
-DEFAULT_OLLAMA_MODEL = "llama3.1:8b-instruct-q8_0"
+DEFAULT_OLLAMA_MODEL = "mistral:instruct"
 
 # Configure logging
 logging.basicConfig(

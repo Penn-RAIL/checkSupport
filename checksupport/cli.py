@@ -14,6 +14,37 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from checksupport import __version__, __author__, __description__
 
 
+def check_virtual_environment():
+    """Check if the virtual environment is activated and warn if not."""
+    # Check if we're in a virtual environment
+    if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+        return True  # Already in a virtual environment
+    
+    # Check if we're running from the checksupport virtual environment
+    script_dir = Path(__file__).parent
+    if "checksupport" in str(script_dir) and script_dir.name == "checksupport":
+        # We're likely in the virtual environment
+        return True
+    
+    # Check if the current Python is from the checksupport venv
+    python_path = Path(sys.executable)
+    if "checksupport" in str(python_path):
+        return True
+    
+    # Not in virtual environment - show warning
+    print("⚠️  WARNING: Virtual environment not activated!")
+    print("")
+    print("To activate the CheckSupport environment:")
+    print("  source checksupport/bin/activate")
+    print("")
+    print("Or run the setup script:")
+    print("  ./checksupport.sh setup")
+    print("")
+    print("Continuing with current Python environment...")
+    print("")
+    return False
+
+
 def create_parser():
     """Create the main argument parser for CheckSupport CLI."""
     parser = argparse.ArgumentParser(
@@ -53,8 +84,8 @@ Examples:
     )
     suggest_parser.add_argument(
         "--model",
-        default="llama3.1:8b-instruct-q8_0",
-        help="Ollama model to use (default: llama3.1:8b-instruct-q8_0)"
+        default="mistral:instruct",
+        help="Ollama model to use (default: mistral:instruct)"
     )
     suggest_parser.add_argument(
         "--verbose",
@@ -85,8 +116,8 @@ Examples:
     )
     fill_parser.add_argument(
         "--model",
-        default="llama3.1:8b-instruct-q8_0",
-        help="Ollama model to use (default: llama3.1:8b-instruct-q8_0)"
+        default="mistral:instruct",
+        help="Ollama model to use (default: mistral:instruct)"
     )
     fill_parser.add_argument(
         "--verbose",
@@ -99,6 +130,9 @@ Examples:
 
 def main():
     """Main entry point for CheckSupport CLI."""
+    # Check virtual environment status
+    check_virtual_environment()
+    
     parser = create_parser()
     args = parser.parse_args()
     
@@ -116,6 +150,8 @@ def main():
             if manuscript_text is None:
                 print(f"Error: Could not extract text from manuscript file: {args.manuscript}")
                 sys.exit(1)
+
+            print(f"Manuscript text extracted successfully. Length: {len(manuscript_text)} characters")
             
             # Get suggestion
             suggestion = suggest_checklist_with_ollama(manuscript_text, args.model)
@@ -130,7 +166,7 @@ def main():
             
             # Set up arguments for fill_checklist
             sys.argv = [
-                "fill-checklist",
+                "fill",
                 "--checklist", args.checklist,
                 "--manuscript", args.manuscript,
                 "--output", args.output,

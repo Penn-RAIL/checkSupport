@@ -1,4 +1,4 @@
-# CheckSupport- A CLI Tool
+# CheckSupport - A CLI Tool
 
 ![Alt text](CS_LOGO.png)
 
@@ -6,43 +6,86 @@ A command-line tool to suggest and fill reporting checklists for research manusc
 
 ## Installation
 
-1.  **Install Ollama:** Follow the instructions on [ollama.com](https://ollama.com/) to download and install Ollama for your operating system.
+**One-Command Setup:**
 
-2.  **Pull an LLM:** Open your terminal and pull a suitable instruction-following model. The current default is `llama3.1:8b-instruct-q8_0`. Examples:
-    ```bash
-    ollama pull llama3.1:8b-instruct-q8_0
-    # or
-    ollama pull mistral:instruct 
-    # or
-    ollama pull gemma:7b-it
-    ```
-    Make sure the Ollama application/server is running in the background.
+```bash
+# Clone the repository
+git clone <your-repo-url> checkSupport
+cd checkSupport
 
-3.  **Clone the Repository & Install Dependencies:**
-    ```bash
-    git clone <your-repo-url> checklist_cli
-    cd checklist_cli
-    pip install -r requirements.txt 
-    # or python -m pip install -r requirements.txt
-    ```
+# Run the complete setup (installs Python environment, Ollama, dependencies, and models)
+./checksupport.sh setup
+```
+
+This single command will:
+- Create a Python virtual environment
+- Install all Python dependencies
+- Install Ollama (if not already installed)
+- Pull the default model (`llama3.1:8b-instruct-q8_0`)
+- Install the CheckSupport CLI tools
+- Start the Ollama service
+
+**Alternative Setup Options:**
+
+```bash
+# Install with a different model
+./checksupport.sh setup -m llama3.1:8b-instruct-q8_0
+
+# Install with a smaller model (if you have memory constraints)
+./checksupport.sh setup -m phi3:mini
+
+# Skip model download (install later manually)
+./checksupport.sh setup --skip-model
+
+# Force reinstallation
+./checksupport.sh setup -f
+
+# Check installation status
+./checksupport.sh status
+
+# Test the installation
+./checksupport.sh test
+```
 
 ## Usage
 
-Make sure the Ollama application is running before executing the commands.
+After running the setup, your CheckSupport environment is ready to use. The Ollama service will be running automatically.
+
+### Environment Management
+
+```bash
+# Start the environment (activate venv + start Ollama)
+./checksupport.sh start
+
+# Stop Ollama service
+./checksupport.sh stop
+
+# Activate virtual environment only
+./checksupport.sh activate
+
+# Deactivate environment and stop services
+./checksupport.sh deactivate
+
+# Check environment status
+./checksupport.sh status
+
+# Test environment functionality
+./checksupport.sh test
+```
 
 ### Suggest a Checklist
 
 Analyzes a manuscript and suggests the most appropriate reporting checklist (CONSORT, PRISMA, STARD, DEAL).
 
 ```bash
-# Using the default model (llama3.1:8b-instruct-q8_0)
+# Using the consolidated script
+./checksupport.sh suggest /path/to/your/manuscript.pdf 
+
+# Using the CLI directly
 checksupport suggest /path/to/your/manuscript.pdf 
 
-# Using individual command
-suggest-checklist /path/to/your/manuscript.pdf
-
 # Specifying a different Ollama model
-checksupport suggest /path/to/your/manuscript.pdf --model mistral:instruct 
+./checksupport.sh suggest /path/to/your/manuscript.pdf --model mistral:instruct 
 # Output: Suggested checklist: PRISMA 
 ```
 
@@ -54,14 +97,14 @@ checksupport suggest /path/to/your/manuscript.pdf --model mistral:instruct
 Fills a custom checklist based on the content of a manuscript and generates a PDF report. The checklist can be provided as a PDF, DOCX, or TXT file containing the checklist items.
 
 ```bash
-# Using the main CLI
+# Using the consolidated script
+./checksupport.sh fill --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
+
+# Using the CLI directly
 checksupport fill --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
 
-# Using individual command
-fill-checklist --checklist ./files/prismaChecklist.pdf --manuscript paper.docx --output filled_prisma_report.pdf
-
 # Specifying a different Ollama model
-checksupport fill --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
+./checksupport.sh fill --checklist consort_checklist.txt --manuscript study.pdf --output consort_report.pdf --model gemma:7b-it
 # Output: Checklist successfully generated: consort_report.pdf
 ```
 
@@ -70,12 +113,38 @@ checksupport fill --checklist consort_checklist.txt --manuscript study.pdf --out
 *   `--output`: Path for the generated PDF report (defaults to `filled_checklist.pdf`)
 *   `--model`: Optional Ollama model name to use (defaults to `llama3.1:8b-instruct-q8_0`)
 
+### Model Management
+
+```bash
+# Pull a specific model
+./checksupport.sh pull-model llama3.1:8b-instruct-q8_0
+
+# List installed models
+./checksupport.sh list-models
+```
+
 ### Available Commands
 
-- `checksupport suggest <manuscript>` - Suggest appropriate checklist
-- `checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output>` - Fill checklist
-- `suggest-checklist <manuscript>` - Individual suggest command
-- `fill-checklist --checklist <checklist> --manuscript <manuscript> --output <output>` - Individual fill command
+**Environment Management:**
+- `./checksupport.sh setup` - Complete environment setup
+- `./checksupport.sh start` - Start environment (activate venv + start Ollama)
+- `./checksupport.sh stop` - Stop Ollama service
+- `./checksupport.sh activate` - Activate virtual environment only
+- `./checksupport.sh deactivate` - Deactivate environment and stop services
+- `./checksupport.sh status` - Check environment status
+- `./checksupport.sh test` - Test environment functionality
+- `./checksupport.sh clean` - Remove environment and Ollama installation
+- `./checksupport.sh update` - Update environment and dependencies
+
+**CLI Commands:**
+- `./checksupport.sh suggest <manuscript>` - Suggest appropriate checklist
+- `./checksupport.sh fill --checklist <checklist> --manuscript <manuscript> --output <output>` - Fill checklist
+- `checksupport suggest <manuscript>` - Direct CLI suggest command
+- `checksupport fill --checklist <checklist> --manuscript <manuscript> --output <output>` - Direct CLI fill command
+
+**Model Management:**
+- `./checksupport.sh pull-model <model>` - Pull specific Ollama model
+- `./checksupport.sh list-models` - List installed models
 
 The script automatically detects and processes different checklist formats:
 - **PRISMA**: For systematic reviews and meta-analyses
@@ -83,6 +152,28 @@ The script automatically detects and processes different checklist formats:
 - **CONSORT**: For randomized controlled trials
 - **Custom formats**: With `::` separators for item instructions
 - **Generic**: Automatically parsed checklist structures
+
+## Management Commands
+
+```bash
+# Start Ollama service (if not running)
+./check-support.sh start
+
+# Stop Ollama service
+./check-support.sh stop
+
+# Restart Ollama service
+./check-support.sh restart
+
+# Check system status
+./check-support.sh status
+
+# Test the installation
+./check-support.sh test
+
+# Clean installation (removes everything)
+./check-support.sh clean
+```
 
 ## Scripts
 
