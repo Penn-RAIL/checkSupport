@@ -1,5 +1,7 @@
 # CheckSupport
 
+![Alt text](CS_LOGO.png)
+
 A command-line tool for suggesting and filling reporting checklists for research manuscripts using local language models via Ollama.
 
 ## Installation
